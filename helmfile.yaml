@@ -1,0 +1,14 @@
+helmDefaults:
+  createNamespace: true
+
+releases:
+  - name: argo-cd
+    namespace: argo-cd
+    chart: argo/argo-cd
+    values:
+    - argo-cd/values.yaml
+  - name: argo-workflows
+    namespace: argo-workflows
+    chart: argo/argo-workflows
+    values:
+    - argo-workflows/values.yaml
