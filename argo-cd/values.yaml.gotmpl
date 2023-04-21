@@ -1,0 +1,55 @@
+server:
+  service:
+    servicePortHttp: 8080
+configs:
+  params:
+    server.insecure: true
+  cm:
+    url: {{ requiredEnv "ARGO_CD_URL" }}
+    dex.config: |
+      connectors:
+        - type: github
+          id: github
+          name: GitHub
+          config:
+            useLoginAsID: true
+            clientID: $dex.github.clientID
+            clientSecret: $dex.github.clientSecret
+            orgs:
+              - name: {{ requiredEnv "GITHUB_ORG" }}
+      staticClients:
+        - id: {{ requiredEnv "ARGO_WF_CLIENT_ID" }}
+          name: Argo Workflow
+          redirectURIs:
+            - {{ requiredEnv "ARGO_WF_URL" }}/oauth2/callback
+          secretEnv: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+  secret:
+    extra:
+      dex.github.clientID: {{ requiredEnv "GITHUB_CLIENT_ID"}}
+      dex.github.clientSecret: {{ requiredEnv "GITHUB_CLIENT_SECRET"}}
+      dex.argo-workflows.clientSecret: {{ requiredEnv "ARGO_WF_CLIENT_SECRET"}}
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      g, {{ requiredEnv "GITHUB_ORG" }}}:{{ requiredEnv "GITHUB_TEAM" }}, role:org-admin
+      p, role:org-admin, applications, get,       */*, allow
+      p, role:org-admin, applications, create,    */*, allow
+      p, role:org-admin, applications, update,    */*, allow
+      p, role:org-admin, applications, sync,      */*, allow
+      p, role:org-admin, applications, override,  */*, allow
+      p, role:org-admin, applications, action,    */*, allow
+      p, role:org-admin, projects,     get,       *,   allow
+      p, role:org-admin, projects,     create,    *,   allow
+      p, role:org-admin, projects,     update,    *,   allow
+      p, role:org-admin, clusters,     get,       *,   allow
+      p, role:org-admin, repositories, get,       *,   allow
+      p, role:org-admin, repositories, create,    *,   allow
+      p, role:org-admin, repositories, update,    *,   allow
+  
+dex:
+  env:
+  - name: ARGO_WORKFLOWS_SSO_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: argocd-secret
+        key: dex.argo-workflows.clientSecret
