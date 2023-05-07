@@ -1,0 +1,12 @@
+helmDefaults:
+  createNamespace: true
+
+releases:
+- name: argo-workflows
+  namespace: argo-workflows
+  chart: argo/argo-workflows
+  values:
+  - argo-workflows/values.yaml
+- name: test-sa
+  namespace: argo-workflows
+  chart: ./sample-sa
