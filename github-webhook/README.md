@@ -1,5 +1,9 @@
 # GitHub Webhook
 
+## Overview
+
+![image](./images/architecture-diagram.drawio.png)
+
 ## Procedure
 
 1. Install ArgoWorkflows to your local k8s cluster
