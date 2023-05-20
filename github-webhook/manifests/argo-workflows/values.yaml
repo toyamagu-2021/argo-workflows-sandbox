@@ -1,0 +1,28 @@
+# To list service accounts
+## Log: argo-server time="2023-05-20T11:09:24.901Z" level=error msg="Failed to process webhook request" error="failed to get service account \"github.com\": serviceaccounts \"github.com\" is forbidden: User \"system:serviceaccount:argo:argo-workflows-server\" cannot get resource \"serviceaccounts\" in API group \"\" in the namespace \"argo\""
+extraObjects:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    name: argo-workflows-sa-r
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - serviceaccounts
+    verbs:
+    - get
+    - list
+    - watch
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: argo-workflows-sa-r
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: argo-workflows-sa-r
+  subjects:
+    - kind: ServiceAccount
+      name: argo-workflows-server
+      namespace: argo
