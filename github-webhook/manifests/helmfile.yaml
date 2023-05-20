@@ -3,17 +3,21 @@ repositories:
     url: https://argoproj.github.io/argo-helm
 
 releases:
-- name: webhook-resources
-  namespace: argo
-  chart: ./github
-- name: user
-  namespace: argo
-  chart: ./user
+# ArgoWF本体
 - name: argo-workflows
   namespace: argo
   chart: argo/argo-workflows
   values:
   - argo-workflows/values.yaml
+# ArgoWFアクセス用ユーザー
+- name: user
+  namespace: argo
+  chart: ./user
+# Webhook用のリソース
+- name: webhook-resources
+  namespace: argo
+  chart: ./github
+# WebhookでトリガーされるWorkflow
 - name: workflow-templates
   namespace: argo
   chart: ./workflow-templates
