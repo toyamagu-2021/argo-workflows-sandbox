@@ -1,0 +1,112 @@
+# https://github.com/argoproj/argo-workflows/issues/8882
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: slack-bot-hook
+  namespace: argo
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: exit-code
+        value: 0
+  hooks:
+    on-start:
+      expression: workflow.status == "Running"
+      template: notify-slack
+      arguments:
+        parameters:
+          - name: color
+            value: good
+    on-succeed:
+      expression: workflow.status == "Succeeded"
+      template: notify-slack
+      arguments:
+        parameters:
+          - name: color
+            value: good
+    on-fail:
+      expression: workflow.status == "Failed" || workflow.status == "Error"
+      template: notify-slack
+      arguments:
+        parameters:
+          - name: message
+            value: |
+              :exclamation: `{{ workflow.name }}` is `{{ workflow.status }}` :exclamation:
+
+              ```
+              {{ workflow.failures }}
+              ```
+          - name: color
+            value: danger
+
+  templates:
+  - name: main
+    steps:
+    - - name: call-sh-exit
+        templateRef:
+          name: sh-exit
+          template: main
+        arguments:
+          parameters:
+            - name: exit-code
+              value: "{{ workflow.parameters.exit-code }}"
+              
+  - name: notify-slack
+    inputs:
+      parameters:
+        - name: message
+          default: "`{{ workflow.name }}` is `{{ workflow.status }}`"
+        - name: color
+          default: "good"
+    steps:
+    - - name: slack-bot 
+        template: message
+        arguments:
+          parameters:
+            - name: message
+              value: "{{ inputs.parameters.message }}"
+            - name: color
+              value: "{{ inputs.parameters.color }}"
+  - name: message
+    inputs:
+      parameters:
+        - name: color
+        - name: message
+        - name: header
+          default: "Argo Workflows"
+    container:
+      image: ghcr.io/nagomiso/slackutils
+      envFrom:
+      - secretRef:
+          name: slack-secret
+      args:
+        - webhook-send
+        - --color
+        - "{{inputs.parameters.color}}"
+        - --header
+        - "{{inputs.parameters.header}}"
+        - --message
+        - "{{ inputs.parameters.message }}"
+        # https://argoproj.github.io/argo-workflows/variables/#global
+        - --field
+        - |
+          *creator:*
+          `{{ workflow.labels.workflows.argoproj.io/creator }}`
+        - --field
+        - |
+          *WorkflowTemplate:*
+          `{{ workflow.labels.workflows.argoproj.io/workflow-template }}`
+        - --field
+        - |
+          *creationTimestamp:*
+          {{ workflow.creationTimestamp }}
+        - --field
+        - |
+          *duration:*
+          {{ workflow.duration }}s
+        - --field
+        - |
+          *uid:*
+          {{ workflow.uid }}
+          
