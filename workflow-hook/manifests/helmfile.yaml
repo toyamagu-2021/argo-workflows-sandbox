@@ -1,0 +1,15 @@
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+# ArgoWF本体
+- name: argo-workflows
+  namespace: argo
+  chart: argo/argo-workflows
+  values:
+  - argo-workflows/values.yaml.gotmpl
+# ArgoWFアクセス用ユーザー
+- name: user
+  namespace: argo
+  chart: ./user

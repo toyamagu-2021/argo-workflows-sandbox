@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: sh-exit
+  namespace: argo
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: exit-code
+        value: 0
+  templates:
+  - name: main
+    steps:
+    - - name: exit
+        template: sh-exit
+        arguments:
+          parameters:
+            - name: exit-code
+              value: "{{ workflow.parameters.exit-code }}"
+
+  - name: sh-exit
+    inputs:
+      parameters: 
+      - name: exit-code
+    script: 
+      image: alpine:3.4
+      command: [sh]
+      source: |
+        exit {{ inputs.parameters.exit-code }}
