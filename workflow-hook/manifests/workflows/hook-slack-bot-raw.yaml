@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: slack-bot-hook
+  name: hook-slack-bot-raw
   namespace: argo
 spec:
   entrypoint: main
@@ -11,21 +11,21 @@ spec:
       - name: exit-code
         value: 0
   hooks:
-    on-start:
+    on-start-test:
       expression: workflow.status == "Running"
       template: notify-slack
       arguments:
         parameters:
           - name: color
             value: good
-    on-succeed:
+    on-succeed-test:
       expression: workflow.status == "Succeeded"
       template: notify-slack
       arguments:
         parameters:
           - name: color
             value: good
-    on-fail:
+    on-fail-test:
       expression: workflow.status == "Failed" || workflow.status == "Error"
       template: notify-slack
       arguments:

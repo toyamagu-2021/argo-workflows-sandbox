@@ -1,3 +1,12 @@
+environments:
+  default:
+    values:
+    - createWorkflowDefaults: true
+  withought-workflow-defaults:
+    values:
+    - createWorkflowDefaults: false
+  
+
 repositories:
   - name: argo
     url: https://argoproj.github.io/argo-helm
@@ -13,3 +22,6 @@ releases:
 - name: user
   namespace: argo
   chart: ./user
+- name: workflows
+  namespace: argo
+  chart: ./workflows

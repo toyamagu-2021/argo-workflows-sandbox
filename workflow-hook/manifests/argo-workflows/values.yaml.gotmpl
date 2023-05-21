@@ -1,3 +1,4 @@
+{{- if .Values.createWorkflowDefaults }}
 controller:
     workflowDefaults: 
       spec:
@@ -88,6 +89,7 @@ controller:
               - |
                 *uid:*
                 {{ `{{ workflow.uid }}` }}
+{{- end }}
 
 extraObjects:
 - apiVersion: v1
