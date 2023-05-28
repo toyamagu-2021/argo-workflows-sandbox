@@ -1,6 +1,6 @@
-repositories:
-  - name: argo
-    url: https://argoproj.github.io/argo-helm
+# repositories:
+#   - name: argo
+#     url: https://argoproj.github.io/argo-helm
 
 releases:
 # ArgoWF本体
@@ -9,6 +9,9 @@ releases:
   chart: argo/argo-workflows
   values:
   - argo-workflows/values.yaml
+# Ingress
+- name: ingress
+  chart: ./ingress
 # ArgoWFアクセス用ユーザー
 - name: user
   namespace: argo

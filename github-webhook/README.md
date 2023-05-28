@@ -21,6 +21,7 @@
     1. `NGROK_AUTHTOKEN=<INSERT-YOUR-TOKEN>`
     1. `docker run -it -e NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN} ngrok/ngrok:latest http http://host.docker.internal:2746`
         - It works in WSL2, but one might change this command. For a detailed description, see [ref](https://ngrok.com/docs/using-ngrok-with/docker/).
+        - `docker run --net=host -it -e NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN} ngrok/ngrok:latest http 80`
     1. Access to `https://<YOUR_DOMAIN>.ngrok-free.app`
 1. Test to submit workflow
     1. `ARGO_SERVER=localhost:2746`
