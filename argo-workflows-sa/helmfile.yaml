@@ -10,3 +10,6 @@ releases:
 - name: test-sa
   namespace: argo-workflows
   chart: ./sample-sa
+- name: workflowtemplates
+  namespace: argo-workflows
+  chart: ./workflows

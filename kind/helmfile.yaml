@@ -1,0 +1,9 @@
+helmDefaults:
+  createNamespace: true
+
+releases:
+- name: ingress-nginx
+  chart: ./nginx-ingress
+- name: ingress
+  namespace: argo-workflows
+  chart: ./ingress

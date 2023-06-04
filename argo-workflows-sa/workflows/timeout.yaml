@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: timeout
+  namespace: argo-workflows
+spec:
+  templates:
+    - name: entrypoint
+      steps:
+        - - name: timeout-test
+            template: timeout
+    - name: timeout
+      timeout: "10s"
+      container:
+        image: alpine:3.6
+        command:
+          - sh
+          - -c
+        args:
+          - "sleep 100"
+  entrypoint: entrypoint
