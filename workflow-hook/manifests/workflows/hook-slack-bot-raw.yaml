@@ -3,7 +3,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
   name: hook-slack-bot-raw
-  namespace: argo
 spec:
   entrypoint: main
   arguments:
