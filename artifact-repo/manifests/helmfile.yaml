@@ -1,0 +1,17 @@
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+# ArgoWF本体
+- name: argo-workflows
+  namespace: argo-workflows
+  chart: argo/argo-workflows
+  values:
+  - argo-workflows/values.yaml.gotmpl
+- name: manifests
+  namespace: argo-workflows
+  chart: manifests
+- name: mysql
+  namespace: argo-workflows
+  chart: mysql

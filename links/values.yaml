@@ -1,0 +1,13 @@
+controller:
+  # -- Configure Argo Server to show custom [links]
+  ## Ref: https://argoproj.github.io/argo-workflows/links/
+  links:
+    - name: View WorkflowLog in Datadog
+      scope: workflow
+      url: "http://app.datadoghq.com/logs?query=kube_namespace:${metadata.namespace}%20kube_ownerref_name:${metadata.name}%20&from_ts=${status.startedAtEpoch}&to_ts=${status.finishedAtEpoch}&live=false"
+    - name: View PodLog in Datadog
+      scope: pod
+      url: "http://app.datadoghq.com/logs?query=kube_namespace:${metadata.namespace}%20pod_name:${metadata.name}%20&from_ts=${status.startedAtEpoch}&to_ts=${status.finishedAtEpoch}&live=false"
+    - name: View PodLog in Datadog
+      scope: pod-logs
+      url: "http://app.datadoghq.com/logs?query=kube_namespace:${metadata.namespace}%20pod_name:${metadata.name}%20&from_ts=${status.startedAtEpoch}&to_ts=${status.finishedAtEpoch}&live=false"
