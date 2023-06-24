@@ -6,7 +6,8 @@ releases:
 # ArgoWF本体
 - name: argo-workflows
   namespace: argo-workflows
-  chart: argo/argo-workflows
+  #chart: argo/argo-workflows
+  chart: "../../../argo-helm/charts/argo-workflows"
   values:
   - argo-workflows/values.yaml.gotmpl
 - name: manifests

@@ -35,6 +35,80 @@ controller:
     failed: 3
     errored: 3
 
+artifactRepositoryRef:
+  artifact-repositories:
+    annotations:
+      workflows.argoproj.io/default-artifact-repository: default-s3
+    default-s3:
+      archiveLogs: true
+      s3:
+        accessKeySecret:
+          name: s3-secret
+          key: accessKeyId
+        secretKeySecret:
+          name: s3-secret
+          key: accessKeySecret
+        endpoint: s3.amazonaws.com
+        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
+        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
+        insecure: false
+        useSDKCreds: false
+        encryptionOptions:
+          enableEncryption: false
+        keyFormat: "argo-workflows\
+          /{{ `{{workflow.creationTimestamp.Y}}` }}\
+          /{{ `{{workflow.creationTimestamp.m}}` }}\
+          /{{ `{{workflow.creationTimestamp.d}}` }}\
+          /{{ `{{workflow.name }}` }}\
+          /{{ `{{pod.name}}` }}"
+    non-default-s3:
+      archiveLogs: true
+      s3:
+        accessKeySecret:
+          name: s3-secret
+          key: accessKeyId
+        secretKeySecret:
+          name: s3-secret
+          key: accessKeySecret
+        endpoint: s3.amazonaws.com
+        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
+        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
+        insecure: false
+        useSDKCreds: false
+        encryptionOptions:
+          enableEncryption: false
+        keyFormat: "this-is-non-default\
+          /{{ `{{workflow.creationTimestamp.Y}}` }}\
+          /{{ `{{workflow.creationTimestamp.m}}` }}\
+          /{{ `{{workflow.creationTimestamp.d}}` }}\
+          /{{ `{{workflow.name }}` }}\
+          /{{ `{{pod.name}}` }}"
+  artifact-repositories-2:
+    annotations:
+      workflows.argoproj.io/default-artifact-repository: default-s3
+    default-s3:
+      archiveLogs: true
+      s3:
+        accessKeySecret:
+          name: s3-secret
+          key: accessKeyId
+        secretKeySecret:
+          name: s3-secret
+          key: accessKeySecret
+        endpoint: s3.amazonaws.com
+        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
+        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
+        insecure: false
+        useSDKCreds: false
+        encryptionOptions:
+          enableEncryption: false
+        keyFormat: "argo-workflows-2\
+          /{{ `{{workflow.creationTimestamp.Y}}` }}\
+          /{{ `{{workflow.creationTimestamp.m}}` }}\
+          /{{ `{{workflow.creationTimestamp.d}}` }}\
+          /{{ `{{workflow.name }}` }}\
+          /{{ `{{pod.name}}` }}"
+
 extraObjects:
 - apiVersion: v1
   kind: Secret
@@ -65,58 +139,3 @@ extraObjects:
   stringData:
     username: mysql
     password: password
-- apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    # If you want to use this config map by default, name it "artifact-repositories". Otherwise, you can provide a reference to a
-    # different config map in `artifactRepositoryRef.configMap`.
-    name: artifact-repositories
-    namespace: argo-workflows
-    annotations:
-      # v3.0 and after - if you want to use a specific key, put that key into this annotation.
-      workflows.argoproj.io/default-artifact-repository: default-s3
-  data:
-    default-s3: |
-      archiveLogs: true
-      s3:
-        accessKeySecret:
-          name: s3-secret
-          key: accessKeyId
-        secretKeySecret:
-          name: s3-secret
-          key: accessKeySecret
-        endpoint: s3.amazonaws.com
-        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
-        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
-        insecure: false
-        useSDKCreds: false
-        encryptionOptions:
-          enableEncryption: false
-        keyFormat: "argo-workflows\
-          /{{`{{ printf "{{workflow.creationTimestamp.Y}}" }}`}}\
-          /{{`{{ printf "{{workflow.creationTimestamp.m}}" }}`}}\
-          /{{`{{ printf "{{workflow.creationTimestamp.d}}" }}`}}\
-          /{{`{{ printf "{{workflow.name}}" }}`}}\
-          /{{`{{ printf "{{pod.name}}" }}`}}"
-    non-default-s3: |
-      archiveLogs: true
-      s3:
-        accessKeySecret:
-          name: s3-secret
-          key: accessKeyId
-        secretKeySecret:
-          name: s3-secret
-          key: accessKeySecret
-        endpoint: s3.amazonaws.com
-        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
-        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
-        insecure: false
-        useSDKCreds: false
-        encryptionOptions:
-          enableEncryption: false
-        keyFormat: "this-is-non-default\
-          /{{`{{ printf "{{workflow.creationTimestamp.Y}}" }}`}}\
-          /{{`{{ printf "{{workflow.creationTimestamp.m}}" }}`}}\
-          /{{`{{ printf "{{workflow.creationTimestamp.d}}" }}`}}\
-          /{{`{{ printf "{{workflow.name}}" }}`}}\
-          /{{`{{ printf "{{pod.name}}" }}`}}"
