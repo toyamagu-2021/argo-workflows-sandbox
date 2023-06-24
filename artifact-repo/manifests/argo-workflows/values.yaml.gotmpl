@@ -5,25 +5,13 @@ artifactRepository:
   archiveLogs: true
   # -- Store artifact in a S3-compliant object store
   # @default -- See [values.yaml]
-  s3:
-    # Note the `key` attribute is not the actual secret, it's the PATH to
-    # the contents in the associated secret, as defined by the `name` attribute.
-    accessKeySecret:
-      name: s3-secret
-      key: accessKeyId
-    secretKeySecret:
-      name: s3-secret
-      key: accessKeySecret
-    # insecure will disable TLS. Primarily used for minio installs not configured with TLS
-    insecure: false
-    useSDKCreds: false
-    encryptionOptions:
-       enableEncryption: false
-    keyFormat: "argo-wf/{{`{{workflow.name}}`}}-{{`{{workflow.uid}}`}}/{{`{{pod.name}}`}}/"
-    endpoint: s3.amazonaws.com
-    bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
 
 controller:
+  workflowDefaults:
+    spec:
+      artifactRepositoryRef:
+        configMap: artifact-repositories # default is "artifact-repositories"
+        key: default-s3 # default can be set by the `workflows.argoproj.io/default-artifact-repository` annotation in config map.
   persistence:
     connectionPool:
       maxIdleConns: 100
@@ -60,6 +48,15 @@ extraObjects:
 - apiVersion: v1
   kind: Secret
   metadata:
+    name: s3-secret
+    namespace: default
+  type: Opaque
+  data:
+    accessKeyId: {{ requiredEnv "ACCESS_KEY_ID" | b64enc | quote}}
+    accessKeySecret: {{ requiredEnv "ACCESS_KEY_SECRET" | b64enc | quote}}
+- apiVersion: v1
+  kind: Secret
+  metadata:
     name: argo-mysql-config
     namespace: argo-workflows
     labels:
@@ -68,4 +65,58 @@ extraObjects:
   stringData:
     username: mysql
     password: password
-  
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    # If you want to use this config map by default, name it "artifact-repositories". Otherwise, you can provide a reference to a
+    # different config map in `artifactRepositoryRef.configMap`.
+    name: artifact-repositories
+    namespace: argo-workflows
+    annotations:
+      # v3.0 and after - if you want to use a specific key, put that key into this annotation.
+      workflows.argoproj.io/default-artifact-repository: default-s3
+  data:
+    default-s3: |
+      archiveLogs: true
+      s3:
+        accessKeySecret:
+          name: s3-secret
+          key: accessKeyId
+        secretKeySecret:
+          name: s3-secret
+          key: accessKeySecret
+        endpoint: s3.amazonaws.com
+        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
+        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
+        insecure: false
+        useSDKCreds: false
+        encryptionOptions:
+          enableEncryption: false
+        keyFormat: "argo-workflows\
+          /{{`{{ printf "{{workflow.creationTimestamp.Y}}" }}`}}\
+          /{{`{{ printf "{{workflow.creationTimestamp.m}}" }}`}}\
+          /{{`{{ printf "{{workflow.creationTimestamp.d}}" }}`}}\
+          /{{`{{ printf "{{workflow.name}}" }}`}}\
+          /{{`{{ printf "{{pod.name}}" }}`}}"
+    non-default-s3: |
+      archiveLogs: true
+      s3:
+        accessKeySecret:
+          name: s3-secret
+          key: accessKeyId
+        secretKeySecret:
+          name: s3-secret
+          key: accessKeySecret
+        endpoint: s3.amazonaws.com
+        bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
+        # insecure will disable TLS. Primarily used for minio installs not configured with TLS
+        insecure: false
+        useSDKCreds: false
+        encryptionOptions:
+          enableEncryption: false
+        keyFormat: "this-is-non-default\
+          /{{`{{ printf "{{workflow.creationTimestamp.Y}}" }}`}}\
+          /{{`{{ printf "{{workflow.creationTimestamp.m}}" }}`}}\
+          /{{`{{ printf "{{workflow.creationTimestamp.d}}" }}`}}\
+          /{{`{{ printf "{{workflow.name}}" }}`}}\
+          /{{`{{ printf "{{pod.name}}" }}`}}"

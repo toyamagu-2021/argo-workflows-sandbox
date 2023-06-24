@@ -25,6 +25,8 @@ metadata:
   name: artifactory-repository
   namespace: default
 spec:
+  artifactRepositoryRef:
+    key: non-default-s3
   entrypoint: main
   serviceAccountName: executor
   ttlStrategy:
