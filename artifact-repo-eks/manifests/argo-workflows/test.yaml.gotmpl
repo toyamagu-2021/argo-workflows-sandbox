@@ -1,0 +1,65 @@
+# Example: do not use artifactRepositoryRef
+
+# -- Use static credentials for S3 (eg. when not using AWS IRSA)
+artifactRepository:
+  # -- Archive the main container logs as an artifact
+  archiveLogs: true
+  # -- Store artifact in a S3-compliant object store
+  # @default -- See [values.yaml]
+  s3:
+    roleARN: {{ requiredEnv "ARGO_WF_ROLE_ARN" | quote}}
+    # insecure will disable TLS. Primarily used for minio installs not configured with TLS
+    insecure: false
+    useSDKCreds: true
+    encryptionOptions:
+       enableEncryption: false
+    keyFormat: "argo-wf/{{`{{workflow.name}}`}}-{{`{{workflow.uid}}`}}/{{`{{pod.name}}`}}/"
+    endpoint: s3.amazonaws.com
+    bucket: {{ requiredEnv "S3_BUCKET_NAME" | quote}}
+
+controller:
+  persistence:
+    connectionPool:
+      maxIdleConns: 100
+      maxOpenConns: 0
+      connMaxLifetime: 0s
+    nodeStatusOffLoad: true
+    archive: true
+    mysql:
+      host: mysql
+      port: 3306
+      database: argo
+      tableName: argo_workflows
+      userNameSecret:
+        name: argo-mysql-config
+        key: username
+      passwordSecret:
+        name: argo-mysql-config
+        key: password
+  retentionPolicy:
+    completed: 10
+    failed: 3
+    errored: 3
+
+extraObjects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: s3-secret
+    namespace: argo-workflows
+  type: Opaque
+  data:
+    accessKeyId: {{ requiredEnv "ACCESS_KEY_ID" | b64enc | quote}}
+    accessKeySecret: {{ requiredEnv "ACCESS_KEY_SECRET" | b64enc | quote}}
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: argo-mysql-config
+    namespace: argo-workflows
+    labels:
+      app: mysql
+  type: Opaque 
+  stringData:
+    username: mysql
+    password: password
+  
