@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: good
+  namespace: argo-workflows
+  labels:
+    ok: good
+spec:
+  entrypoint: whalesay-template
+  templates:
+    - name: whalesay-template
+      container:
+        image: docker/whalesay
+        command: [cowsay]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: bad
+  namespace: argo-workflows
+  labels:
+    ok: bad
+spec:
+  entrypoint: whalesay-template
+  templates:
+    - name: whalesay-template
+      container:
+        image: docker/whalesay
+        command: this-is-invalid
