@@ -7,13 +7,13 @@ spec:
   entrypoint: main
   serviceAccountName: executor
   ttlStrategy:
-    secondsAfterSuccess: 5     # Time to live after workflow is successful
+    secondsAfterSuccess: 300     # Time to live after workflow is successful
   templates:
     - name: main
       container:
         image: docker/whalesay:latest
         command: [ sh, -c ]
-        args: [ "cowsay hello world | tee /tmp/hello_world.txt" ]
+        args: [ "cowsay hello world | tee /tmp/hello_world.txt && sleep 300" ]
       outputs:
         artifacts:
           - name: hello_world
@@ -30,7 +30,7 @@ spec:
   entrypoint: main
   serviceAccountName: executor
   ttlStrategy:
-    secondsAfterSuccess: 5     # Time to live after workflow is successful
+    secondsAfterSuccess: 300     # Time to live after workflow is successful
   templates:
     - name: main
       container:
