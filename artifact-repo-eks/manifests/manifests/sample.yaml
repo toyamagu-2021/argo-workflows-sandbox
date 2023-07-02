@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: artifactory-repository
+  namespace: argo-workflows
+  
+spec:
+  entrypoint: main
+  serviceAccountName: executor
+  ttlStrategy:
+    secondsAfterSuccess: 5     # Time to live after workflow is successful
+  templates:
+    - name: main
+      container:
+        image: docker/whalesay:latest
+        command: [ sh, -c ]
+        args: [ "cowsay hello world | tee /tmp/hello_world.txt" ]
+      outputs:
+        artifacts:
+          - name: hello_world
+            path: /tmp/hello_world.txt
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: artifactory-repository
+  namespace: default
+spec:
+  artifactRepositoryRef:
+    key: non-default-s3
+  entrypoint: main
+  serviceAccountName: executor
+  ttlStrategy:
+    secondsAfterSuccess: 5     # Time to live after workflow is successful
+  templates:
+    - name: main
+      container:
+        image: docker/whalesay:latest
+        command: [ sh, -c ]
+        args: [ "cowsay hello world | tee /tmp/hello_world.txt" ]
+      outputs:
+        artifacts:
+          - name: hello_world
+            path: /tmp/hello_world.txt
