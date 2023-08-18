@@ -35,7 +35,7 @@ module "eks" {
   cluster_name    = local.name
   cluster_version = local.cluster_version
 
-  cluster_endpoint_public_access  = true
+  cluster_endpoint_public_access = true
 
   cluster_addons = {
     coredns = {
@@ -79,14 +79,16 @@ module "eks" {
 }
 
 module "irsa_argo_wf" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
-  role_name                          = "${local.name}-argo_wf"
-  allow_self_assume_role = true
+  role_name = "${local.name}-argo_wf"
+  // No need to allow self-allume-role
+  // https://aws.amazon.com/jp/blogs/security/announcing-an-update-to-iam-role-trust-policy-behavior/
+  allow_self_assume_role = false
 
   oidc_providers = {
     main = {
-      provider_arn               = module.eks.oidc_provider_arn
+      provider_arn = module.eks.oidc_provider_arn
       namespace_service_accounts = [
         "argo-workflows:argo-workflows-server",
         "argo-workflows:argo-workflows-workflow-controller",
